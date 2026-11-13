@@ -1,6 +1,6 @@
 ---
 name: Marcus Gomez
-description: An evening sky, restrained. A navy-to-royal header with faint low mist, a warm cream reading field with lifted paper cards, and the night sky again at the close.
+description: An evening sky, restrained. A speckled navy-to-royal header traced with contour lines and faint low mist, fluted glass panels over it, a warm cream reading field with lifted paper cards, and the night sky again at the close.
 colors:
   navy: "#081849"
   sky-mid: "#12266a"
@@ -10,8 +10,10 @@ colors:
   cream-deep: "#e3d3c3"
   magenta: "#893172"
   magenta-hover: "#9b3a82"
+  magenta-lit: "#c46aa9"
   plum: "#5f3475"
   gray: "#cccacc"
+  graphite: "#23262e"
   ink-soft: "#3b4466"
   on-dark-soft: "rgba(236, 223, 210, 0.78)"
   line: "rgba(8, 24, 73, 0.14)"
@@ -99,7 +101,7 @@ components:
     rounded: "{rounded.xl}"
     padding: "5px"
   nav-brand:
-    backgroundColor: "{colors.navy}"
+    backgroundColor: "{colors.graphite}"
     textColor: "{colors.cream}"
     rounded: "{rounded.md}"
     size: "36px"
@@ -119,8 +121,8 @@ components:
     rounded: "{rounded.lg}"
     padding: "{spacing.card}"
   side-card:
-    backgroundColor: "{colors.paper}"
-    textColor: "{colors.navy}"
+    backgroundColor: "rgba(236, 223, 210, 0.07)"
+    textColor: "{colors.cream}"
     rounded: "{rounded.lg}"
     padding: "22px 24px 22px 26px"
   tag:
@@ -155,6 +157,9 @@ The botanical and aloha motifs of an earlier pass, and the bright midday-blue cl
 
 **Key Characteristics:**
 - Navy-to-royal sky at the top, navy again at the close, cream reading field between.
+- Speckled graphite: seeded fleck tiles over the sky, the dusk, the MG tile and the tracker screen, and a faint pencil speckle on the cream field.
+- Topographic contour lines traced across both skies, with heavier index contours every fifth line.
+- Fluted (reeded) glass for the two header side cards and a pane standing behind the contact card, blurring the contours through its ribs.
 - Mist drawn on canvas: wide, flat, soft-edged ellipses at 7-11% alpha, low in the header and one band near the footer.
 - Paper cards (6-12px corners, never pills) with soft navy shadows.
 - Magenta for actions only; plum for dates and labels; royal for structure and "you are here".
@@ -191,6 +196,24 @@ Six owner colours used strictly by role, plus three cream and navy tints derived
 **The Plum Is Meta Rule.** Plum marks when and what-kind: dates, years and contact keys. If a piece of text is neither a date nor a label, it is not plum.
 
 **The Royal Is Structure Rule.** Royal marks where you are and what holds the page together: the nav indicator, rules, key figures, links. It is not an action colour; actions go to magenta.
+
+## Materials
+
+Three materials sit on top of the palette. They are texture and structure, never content, and they stay out of the reading cards.
+
+### Speckled graphite
+Drawn once by script.js into two repeating PNG tiles (seeded, so the pattern is identical on every load) and handed to CSS as `--speckle-dark` and `--speckle-light`. Both default to `none`, so every background still works without JavaScript.
+- **Dark speckle** (240px tile): graphite grains (#03081e at 18-42%), a pale graphite sheen (#9aa0ad at 6-16%) and a few cream flecks (8-20%). Laid over the header and dusk gradients, and over the **Graphite** slab (graphite, #23262e) used for the MG brand tile and the object-tracker screen.
+- **Light speckle** (220px tile): pencil-graphite flecks (#23262e at 5-13%), a trace of plum and a few white flecks on the cream page ground. Paper cards stay clean.
+
+### Contour lines
+A seeded height field (three octaves of value noise plus one or two smooth summits) is traced with marching squares on a canvas behind the mist. Cream lines at 15% alpha, 1px; every fifth line is an index contour at 30% alpha, 1.4px, as on a survey sheet. The header summit sits up and to the right of the name, and a mask holds the lines to 30% strength across the left 34% so they never compete with the name or intro. The dusk summit sits top left. Static; redrawn only on resize.
+
+### Fluted glass
+`.fluted`: cream at 7% over the sky, a 12px vertical reed (lit crest, clear face, shadowed trough) and a soft top sheen, `backdrop-filter: blur(6px) saturate(1.15)` so the contour lines and mist blur through it, a 1px inner cream edge and a top highlight, and a deep navy drop shadow. Without backdrop-filter it falls back to royal-navy at 88%. Used on the two header side cards (cream text, lit-magenta arrows) and on the pane that stands 40px above and to the right of the contact card.
+
+### Named Rules
+**The Materials Stay Outside Rule.** Graphite, contours and glass live on the sky, the dusk and the two slabs. Reading cards on cream never get speckle, contours or glass.
 
 ## Typography
 
@@ -265,10 +288,10 @@ Compact, solid and quick to respond.
 - **Internal Padding:** clamp(24px, 3.4vw, 40px); the contact card uses clamp(28px, 5vw, 56px).
 
 ### Side cards (signature)
-The two "In the field" / "In code" link cards in the header: paper, 10px corners, title in the grotesk at 1.3rem with a magenta arrow pinned right, a one-line fact, then soft-ink terms at 0.88rem. Hover lifts 2px over 220ms and nudges the arrow 3px right; press scales to 0.99.
+The two "In the field" / "In code" link cards in the header, in fluted glass (see Materials): 10px corners, cream title in the grotesk at 1.3rem with a lit-magenta arrow (magenta-lit, #c46aa9, readable on the dark sky) pinned right, a cream one-line fact, then thinned-cream terms at 0.88rem. Hover lifts 2px over 220ms, brightens the glass and its edge, and nudges the arrow 3px right; press scales to 0.99.
 
 ### Navigation
-- **Style:** a fixed paper bar floating 14px below the top edge (10px on phones), 12px corners, 5px inner padding, floating-nav shadow. A navy 36px MG tile leads (32px on phones), then the section links.
+- **Style:** a fixed paper bar floating 14px below the top edge (10px on phones), 12px corners, 5px inner padding, floating-nav shadow. A speckled graphite 36px MG tile leads (32px on phones), then the section links.
 - **Links:** Figtree 600 at 0.9rem, soft ink at rest, navy on hover, 8px 13px padding with 8px corners. Press scales to 0.97.
 - **Current:** a royal 8px indicator slides behind the current link (transform and width over 260ms ease-out), and the current link turns cream. Under reduced motion it only fades.
 - **Mobile:** the bar spans the width and its links scroll sideways with the scrollbar hidden; the current link is scrolled into the centre. Edge-fade masks show when more links are hidden: right edge fades from 78%, left edge from 22%, both edges fade at 18% and 82% when links are hidden on both sides.

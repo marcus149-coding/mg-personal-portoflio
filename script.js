@@ -171,6 +171,123 @@ document.querySelectorAll("canvas[data-clouds]").forEach((canvas, n) => {
   }).observe(canvas);
 });
 
+/* ---------- Speckled graphite: seeded fleck tiles, drawn once, used as CSS backgrounds ---------- */
+(function speckle() {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  function tile(size, seed, flecks) {
+    const c = document.createElement("canvas");
+    c.width = c.height = Math.round(size * dpr);
+    const g = c.getContext("2d");
+    g.scale(dpr, dpr);
+    const rand = seeded(seed);
+    flecks.forEach(({ count, color, alpha, r }) => {
+      for (let i = 0; i < count; i++) {
+        const x = rand() * size, y = rand() * size;
+        const rad = r[0] + Math.pow(rand(), 2.2) * (r[1] - r[0]); // mostly fine grains, a few larger
+        g.globalAlpha = alpha[0] + rand() * (alpha[1] - alpha[0]);
+        g.fillStyle = color;
+        // draw near edges twice so the tile repeats without a seam
+        for (const dx of [0, -size, size]) for (const dy of [0, -size, size]) {
+          if (x + dx < -2 || x + dx > size + 2 || y + dy < -2 || y + dy > size + 2) continue;
+          g.beginPath(); g.arc(x + dx, y + dy, rad, 0, Math.PI * 2); g.fill();
+        }
+      }
+    });
+    return `url(${c.toDataURL("image/png")})`;
+  }
+  const root = document.documentElement.style;
+  try {
+    root.setProperty("--speckle-dark", tile(240, 1913, [
+      { count: 520, color: "#03081e", alpha: [0.18, 0.42], r: [0.45, 1.3] },   // graphite grains
+      { count: 300, color: "#9aa0ad", alpha: [0.06, 0.16], r: [0.4, 1.0] },    // pale graphite sheen
+      { count: 70,  color: "#ecdfd2", alpha: [0.08, 0.2],  r: [0.35, 0.8] },   // cream flecks
+    ]));
+    root.setProperty("--speckle-light", tile(220, 2207, [
+      { count: 260, color: "#23262e", alpha: [0.05, 0.13], r: [0.35, 1.05] },  // pencil graphite on cream
+      { count: 60,  color: "#5f3475", alpha: [0.04, 0.08], r: [0.35, 0.7] },
+      { count: 50,  color: "#ffffff", alpha: [0.25, 0.5],  r: [0.4, 0.9] },
+    ]));
+  } catch { /* canvas unavailable: flat colours remain */ }
+})();
+
+/* ---------- Contour lines: a seeded height field traced with marching squares ---------- */
+function noise2(rand, cols, rows) {
+  const w = cols + 2, grid = new Float32Array(w * (rows + 2));
+  for (let i = 0; i < grid.length; i++) grid[i] = rand();
+  const s = (t) => t * t * (3 - 2 * t);
+  return (x, y) => {
+    const xi = Math.floor(x), yi = Math.floor(y), u = s(x - xi), v = s(y - yi);
+    const a = grid[yi * w + xi], b = grid[yi * w + xi + 1], c = grid[(yi + 1) * w + xi], d = grid[(yi + 1) * w + xi + 1];
+    return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
+  };
+}
+
+const CONTOUR_SCENES = {
+  // a summit up and to the right of the name, rings opening toward the lower header
+  day: { seed: 41, levels: 18, peaks: [{ x: 0.8, y: 0.3, s: 0.26, a: 1.3 }, { x: 0.42, y: 1.05, s: 0.2, a: 0.55 }] },
+  dusk: { seed: 97, levels: 16, peaks: [{ x: 0.1, y: 0.25, s: 0.24, a: 1.1 }, { x: 0.92, y: 0.85, s: 0.18, a: 0.6 }] },
+};
+
+document.querySelectorAll("canvas[data-contours]").forEach((canvas) => {
+  const scene = CONTOUR_SCENES[canvas.dataset.contours];
+  if (!scene) return;
+  const ctx = canvas.getContext("2d");
+
+  function draw() {
+    const W = canvas.clientWidth, H = canvas.clientHeight;
+    if (!W || !H) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const rand = seeded(scene.seed);
+    const octaves = [[300, 1], [150, 0.45], [75, 0.18]].map(([p, wgt]) => ({ p, wgt, n: noise2(rand, Math.ceil(W / p) + 1, Math.ceil(H / p) + 1) }));
+    const ref = Math.max(W, H);
+    const step = W < 600 ? 6 : 8;
+    const nx = Math.ceil(W / step) + 1, ny = Math.ceil(H / step) + 1;
+    const f = new Float32Array(nx * ny);
+    let lo = Infinity, hi = -Infinity;
+    for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
+      const x = Math.min(i * step, W), y = Math.min(j * step, H);
+      let v = 0;
+      for (const o of octaves) v += o.n(x / o.p, y / o.p) * o.wgt;
+      for (const pk of scene.peaks) {
+        const dx = x - pk.x * W, dy = y - pk.y * H, sg = pk.s * ref;
+        v += pk.a * Math.exp(-(dx * dx + dy * dy) / (2 * sg * sg));
+      }
+      f[j * nx + i] = v;
+      if (v < lo) lo = v; if (v > hi) hi = v;
+    }
+
+    ctx.clearRect(0, 0, W, H);
+    ctx.lineJoin = "round"; ctx.lineCap = "round";
+    for (let k = 1; k < scene.levels; k++) {
+      const t = lo + (hi - lo) * (k / scene.levels);
+      const index = k % 5 === 0; // index contours, heavier, as on a survey sheet
+      ctx.strokeStyle = index ? "rgba(236, 223, 210, 0.3)" : "rgba(236, 223, 210, 0.15)";
+      ctx.lineWidth = index ? 1.4 : 1;
+      ctx.beginPath();
+      for (let j = 0; j < ny - 1; j++) for (let i = 0; i < nx - 1; i++) {
+        const a = f[j * nx + i], b = f[j * nx + i + 1], c = f[(j + 1) * nx + i + 1], d = f[(j + 1) * nx + i];
+        const x0 = i * step, y0 = j * step, pts = [];
+        if ((a > t) !== (b > t)) pts.push(x0 + step * (t - a) / (b - a), y0);          // top
+        if ((b > t) !== (c > t)) pts.push(x0 + step, y0 + step * (t - b) / (c - b));   // right
+        if ((d > t) !== (c > t)) pts.push(x0 + step * (t - d) / (c - d), y0 + step);   // bottom
+        if ((a > t) !== (d > t)) pts.push(x0, y0 + step * (t - a) / (d - a));          // left
+        for (let p = 0; p + 3 < pts.length; p += 4) { ctx.moveTo(pts[p], pts[p + 1]); ctx.lineTo(pts[p + 2], pts[p + 3]); }
+      }
+      ctx.stroke();
+    }
+  }
+
+  draw();
+  let timer;
+  new ResizeObserver(() => {
+    clearTimeout(timer);
+    timer = setTimeout(draw, 150);
+  }).observe(canvas);
+});
+
 /* ---------- Experience timeline: months ruled like a measurement, with "now" lit ---------- */
 (function buildTimeline() {
   const rule = document.getElementById("rule");
