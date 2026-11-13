@@ -1,6 +1,6 @@
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-/* ---------- Nav: a royal-blue indicator slides to the current section ---------- */
+/* ---------- Nav: a black indicator slides to the current section ---------- */
 (function nav() {
   const navEl = document.querySelector(".nav");
   const list = document.querySelector(".nav-links");
@@ -94,7 +94,7 @@ function makeCloud(width, rand, tint) {
 const CLOUD_SCENES = {
   // low mist drifting across the bottom of the navy header
   day: {
-    tint: "rgba(236,223,210,1)",
+    tint: "rgba(244,244,244,1)",
     layers: [
       { y: [0.76, 0.86], size: 0.55, alpha: 0.07, speed: 3, density: 0.45 },
       { y: [0.9, 1.02], size: 0.75, alpha: 0.11, speed: 5, density: 0.42 },
@@ -102,7 +102,7 @@ const CLOUD_SCENES = {
   },
   // a single low band under the contact card, leaving the sky behind it calm
   dusk: {
-    tint: "rgba(236,223,210,1)",
+    tint: "rgba(244,244,244,1)",
     layers: [
       { y: [0.94, 1.06], size: 0.75, alpha: 0.09, speed: 3, density: 0.42 },
     ],
@@ -198,13 +198,13 @@ document.querySelectorAll("canvas[data-clouds]").forEach((canvas, n) => {
   const root = document.documentElement.style;
   try {
     root.setProperty("--speckle-dark", tile(240, 1913, [
-      { count: 520, color: "#03081e", alpha: [0.18, 0.42], r: [0.45, 1.3] },   // graphite grains
-      { count: 300, color: "#9aa0ad", alpha: [0.06, 0.16], r: [0.4, 1.0] },    // pale graphite sheen
-      { count: 70,  color: "#ecdfd2", alpha: [0.08, 0.2],  r: [0.35, 0.8] },   // cream flecks
+      { count: 520, color: "#000000", alpha: [0.18, 0.42], r: [0.45, 1.3] },   // graphite grains
+      { count: 300, color: "#9e9e9e", alpha: [0.06, 0.16], r: [0.4, 1.0] },    // pale graphite sheen
+      { count: 70,  color: "#ffffff", alpha: [0.08, 0.2],  r: [0.35, 0.8] },   // white flecks
     ]));
     root.setProperty("--speckle-light", tile(220, 2207, [
-      { count: 260, color: "#23262e", alpha: [0.05, 0.13], r: [0.35, 1.05] },  // pencil graphite on cream
-      { count: 60,  color: "#5f3475", alpha: [0.04, 0.08], r: [0.35, 0.7] },
+      { count: 260, color: "#1c1c1c", alpha: [0.05, 0.13], r: [0.35, 1.05] },  // pencil graphite on the light field
+      { count: 60,  color: "#7a7a7a", alpha: [0.05, 0.1], r: [0.35, 0.7] },
       { count: 50,  color: "#ffffff", alpha: [0.25, 0.5],  r: [0.4, 0.9] },
     ]));
   } catch { /* canvas unavailable: flat colours remain */ }
@@ -264,7 +264,7 @@ document.querySelectorAll("canvas[data-contours]").forEach((canvas) => {
     for (let k = 1; k < scene.levels; k++) {
       const t = lo + (hi - lo) * (k / scene.levels);
       const index = k % 5 === 0; // index contours, heavier, as on a survey sheet
-      ctx.strokeStyle = index ? "rgba(236, 223, 210, 0.3)" : "rgba(236, 223, 210, 0.15)";
+      ctx.strokeStyle = index ? "rgba(244, 244, 244, 0.3)" : "rgba(244, 244, 244, 0.15)";
       ctx.lineWidth = index ? 1.4 : 1;
       ctx.beginPath();
       for (let j = 0; j < ny - 1; j++) for (let i = 0; i < nx - 1; i++) {
@@ -333,9 +333,10 @@ document.querySelectorAll("canvas[data-contours]").forEach((canvas) => {
   const ctx = canvas.getContext("2d");
   const css = getComputedStyle(document.documentElement);
   const ink = {
-    box: css.getPropertyValue("--cream").trim() || "#ecdfd2",
-    tag: css.getPropertyValue("--magenta").trim() || "#893172",
-    obj: css.getPropertyValue("--gray").trim() || "#cccacc",
+    box: css.getPropertyValue("--light").trim() || "#f4f4f4",
+    tag: css.getPropertyValue("--light").trim() || "#f4f4f4",
+    tagText: css.getPropertyValue("--ink").trim() || "#0a0a0a",
+    obj: css.getPropertyValue("--gray").trim() || "#cccccc",
   };
   const W = 480, H = 360;
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -350,7 +351,7 @@ document.querySelectorAll("canvas[data-contours]").forEach((canvas) => {
 
   function draw(t) {
     ctx.clearRect(0, 0, W, H);
-    ctx.strokeStyle = "rgba(236, 223, 210, 0.08)";
+    ctx.strokeStyle = "rgba(244, 244, 244, 0.08)";
     ctx.lineWidth = 1;
     for (let x = 40; x < W; x += 40) { ctx.beginPath(); ctx.moveTo(x + 0.5, 0); ctx.lineTo(x + 0.5, H); ctx.stroke(); }
     for (let y = 40; y < H; y += 40) { ctx.beginPath(); ctx.moveTo(0, y + 0.5); ctx.lineTo(W, y + 0.5); ctx.stroke(); }
@@ -371,7 +372,7 @@ document.querySelectorAll("canvas[data-contours]").forEach((canvas) => {
       const lw = ctx.measureText(label).width + 10;
       ctx.fillStyle = ink.tag;
       ctx.fillRect(x - 1, y - 18, lw, 17);
-      ctx.fillStyle = ink.box;
+      ctx.fillStyle = ink.tagText;
       ctx.fillText(label, x + 4, y - 9);
     });
 
