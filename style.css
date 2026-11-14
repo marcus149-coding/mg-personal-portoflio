@@ -5,28 +5,38 @@
    a black close. No hue: ink, white and grays carry every role.
    ============================================================ */
 
+/* Neuton (SIL Open Font License), self-hosted static weights 400, 700, 800 and italic 400.
+   Weight 500 renders as 400 and 600 as 700. */
 @font-face {
-  font-family: "Schibsted Grotesk";
+  font-family: "Neuton";
   font-style: normal;
-  font-weight: 500 800;
+  font-weight: 400;
   font-display: swap;
-  src: url("assets/fonts/SchibstedGrotesk.woff2") format("woff2");
+  src: url("assets/fonts/Neuton-Regular.woff2") format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 @font-face {
-  font-family: "Figtree";
+  font-family: "Neuton";
   font-style: normal;
-  font-weight: 400 600;
+  font-weight: 700;
   font-display: swap;
-  src: url("assets/fonts/Figtree.woff2") format("woff2");
+  src: url("assets/fonts/Neuton-Bold.woff2") format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 @font-face {
-  font-family: "Figtree";
+  font-family: "Neuton";
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("assets/fonts/Neuton-ExtraBold.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Neuton";
   font-style: italic;
   font-weight: 400;
   font-display: swap;
-  src: url("assets/fonts/Figtree-Italic.woff2") format("woff2");
+  src: url("assets/fonts/Neuton-Italic.woff2") format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
@@ -56,8 +66,8 @@
   --speckle-dark-size: 240px;
   --speckle-light-size: 220px;
 
-  --f-display: "Schibsted Grotesk", "Figtree", "Segoe UI", sans-serif;
-  --f-body: "Figtree", "Segoe UI", system-ui, sans-serif;
+  --f-display: "Neuton", Georgia, "Times New Roman", serif;
+  --f-body: "Neuton", Georgia, "Times New Roman", serif;
 
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --radius: 10px;

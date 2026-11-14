@@ -356,7 +356,7 @@ document.querySelectorAll("canvas[data-contours]").forEach((canvas) => {
     for (let x = 40; x < W; x += 40) { ctx.beginPath(); ctx.moveTo(x + 0.5, 0); ctx.lineTo(x + 0.5, H); ctx.stroke(); }
     for (let y = 40; y < H; y += 40) { ctx.beginPath(); ctx.moveTo(0, y + 0.5); ctx.lineTo(W, y + 0.5); ctx.stroke(); }
 
-    ctx.font = "700 12px 'Figtree', sans-serif";
+    ctx.font = "700 12px 'Neuton', Georgia, serif";
     ctx.textBaseline = "middle";
     objects.forEach((o) => {
       const x = o.cx + Math.sin(t * o.fx + o.px) * o.ax - o.w / 2;
@@ -377,7 +377,7 @@ document.querySelectorAll("canvas[data-contours]").forEach((canvas) => {
     });
 
     ctx.fillStyle = ink.box;
-    ctx.font = "700 13px 'Figtree', sans-serif";
+    ctx.font = "700 13px 'Neuton', Georgia, serif";
     ctx.fillText(`objects counted: ${objects.length}`, 14, H - 16);
   }
 

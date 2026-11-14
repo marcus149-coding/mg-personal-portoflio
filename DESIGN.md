@@ -17,47 +17,47 @@ colors:
   line: "rgba(0, 0, 0, 0.12)"
 typography:
   display:
-    fontFamily: "Schibsted Grotesk, Figtree, Segoe UI, sans-serif"
+    fontFamily: "Neuton, Georgia, Times New Roman, serif"
     fontSize: "clamp(3.2rem, 8vw, 5.6rem)"
     fontWeight: 800
     lineHeight: 0.98
     letterSpacing: "-0.035em"
   headline:
-    fontFamily: "Schibsted Grotesk, Figtree, Segoe UI, sans-serif"
+    fontFamily: "Neuton, Georgia, Times New Roman, serif"
     fontSize: "clamp(2rem, 4vw, 2.8rem)"
     fontWeight: 700
     lineHeight: 1.08
     letterSpacing: "-0.025em"
   title:
-    fontFamily: "Schibsted Grotesk, Figtree, Segoe UI, sans-serif"
+    fontFamily: "Neuton, Georgia, Times New Roman, serif"
     fontSize: "1.3rem"
     fontWeight: 700
     lineHeight: 1.08
     letterSpacing: "-0.01em"
   stat:
-    fontFamily: "Schibsted Grotesk, Figtree, Segoe UI, sans-serif"
+    fontFamily: "Neuton, Georgia, Times New Roman, serif"
     fontSize: "2.1rem"
     fontWeight: 800
     lineHeight: 1.05
     letterSpacing: "-0.02em"
     fontFeature: "lnum, pnum"
   lead:
-    fontFamily: "Figtree, Segoe UI, system-ui, sans-serif"
+    fontFamily: "Neuton, Georgia, Times New Roman, serif"
     fontSize: "1.14rem"
     fontWeight: 400
     lineHeight: 1.6
   body:
-    fontFamily: "Figtree, Segoe UI, system-ui, sans-serif"
+    fontFamily: "Neuton, Georgia, Times New Roman, serif"
     fontSize: "1.0625rem"
     fontWeight: 400
     lineHeight: 1.6
   label:
-    fontFamily: "Figtree, Segoe UI, system-ui, sans-serif"
+    fontFamily: "Neuton, Georgia, Times New Roman, serif"
     fontSize: "0.84rem"
     fontWeight: 600
     lineHeight: 1.6
   meta:
-    fontFamily: "Figtree, Segoe UI, system-ui, sans-serif"
+    fontFamily: "Neuton, Georgia, Times New Roman, serif"
     fontSize: "1rem"
     fontWeight: 600
     lineHeight: 1.6
@@ -161,7 +161,7 @@ The owner moved the site to black and white on 2026-11-12. The earlier navy, roy
 - Mist drawn on canvas: wide, flat, soft-edged ellipses at 7-11% alpha, low in the header and one band near the footer.
 - White paper cards (6-12px corners, never pills) with soft black shadows.
 - A black indicator slides under the current section in a floating white nav bar.
-- Schibsted Grotesk headings at heavy weights with tight tracking; Figtree body.
+- Neuton serif throughout: headings at heavy weights with tight tracking, body at regular weight.
 
 ## Colors
 
@@ -212,8 +212,8 @@ A seeded height field (three octaves of value noise plus one or two smooth summi
 
 ## Typography
 
-**Display Font:** Schibsted Grotesk (with Figtree, Segoe UI, sans-serif), self-hosted variable 500-800
-**Body Font:** Figtree (with Segoe UI, system-ui, sans-serif), self-hosted variable 400-600 plus italic 400
+**Display Font:** Neuton (with Georgia, Times New Roman, serif), self-hosted static 700 and 800
+**Body Font:** Neuton (with Georgia, Times New Roman, serif), self-hosted static 400 plus italic 400
 
 **Character:** An editorial newspaper grotesk set heavy and tight for names and headings, paired with a round, open sans for reading. Confident at the top, plain and approachable in the body.
 
@@ -287,7 +287,7 @@ The two "In the field" / "In code" link cards in the header, in fluted glass (se
 
 ### Navigation
 - **Style:** a fixed paper bar floating 14px below the top edge (10px on phones), 12px corners, 5px inner padding, floating-nav shadow. A speckled graphite 36px MG tile leads (32px on phones), then the section links.
-- **Links:** Figtree 600 at 0.9rem, soft ink at rest, ink on hover, 8px 13px padding with 8px corners. Press scales to 0.97.
+- **Links:** Neuton 600 (renders as 700) at 0.9rem, soft ink at rest, ink on hover, 8px 13px padding with 8px corners. Press scales to 0.97.
 - **Current:** a black 8px indicator slides behind the current link (transform and width over 260ms ease-out), and the current link turns light. Under reduced motion it only fades.
 - **Mobile:** the bar spans the width and its links scroll sideways with the scrollbar hidden; the current link is scrolled into the centre. Edge-fade masks show when more links are hidden: right edge fades from 78%, left edge from 22%, both edges fade at 18% and 82% when links are hidden on both sides.
 
