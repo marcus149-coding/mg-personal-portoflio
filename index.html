@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Marcus Gomez · Electrical &amp; Computer Engineering</title>
   <meta name="description" content="Marcus Gomez: Electrical and Computer Engineering student at Santa Clara University and intern with Rosendin Electric's design-build engineering team.">
-  <meta name="theme-color" content="#0a0a0a">
+  <meta name="theme-color" content="#0c0f14">
+  <meta name="color-scheme" content="dark">
   <meta property="og:title" content="Marcus Gomez · Electrical & Computer Engineering">
   <meta property="og:description" content="ECE student at Santa Clara University. Intern with Rosendin Electric's design-build engineering team.">
   <meta property="og:type" content="website">
@@ -13,12 +14,20 @@
   <link rel="preload" href="assets/fonts/Neuton-Regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fonts/Neuton-ExtraBold.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="style.css">
+  <script>document.documentElement.classList.add("js");</script>
 </head>
 <body>
   <a class="skip" href="#experience">Skip to content</a>
 
+  <!-- Light behind the glass: soft pools of coral and mist that the panels refract as you scroll -->
+  <div class="ambient" aria-hidden="true">
+    <span class="pool pool-a"></span>
+    <span class="pool pool-b"></span>
+    <span class="pool pool-c"></span>
+  </div>
+
   <header class="nav-wrap">
-    <nav class="nav" aria-label="Sections">
+    <nav class="nav glass" aria-label="Sections">
       <a class="brand" href="#top" aria-label="Marcus Gomez, back to top">MG</a>
       <ol class="nav-links">
         <li><a href="#experience" data-target="experience">Experience</a></li>
@@ -32,19 +41,17 @@
     </nav>
   </header>
 
-  <!-- First viewport: the sky -->
-  <section id="top" class="sky" aria-label="Introduction">
-    <canvas class="contours" data-contours="day" aria-hidden="true"></canvas>
-    <canvas class="clouds" data-clouds="day" aria-hidden="true"></canvas>
-    <div class="sky-inner">
+  <!-- First viewport -->
+  <section id="top" class="hero" aria-label="Introduction">
+    <div class="hero-inner">
       <div class="intro-block">
+        <p class="from"><span class="dot" aria-hidden="true"></span>From Kailua, HI · now in Santa Clara, CA</p>
         <h1>Marcus Gomez</h1>
         <p class="role">Electrical &amp; Computer Engineering · Santa Clara University, Class of 2029</p>
-        <p class="from"><span class="dot" aria-hidden="true"></span>From Kailua, HI · now in Santa Clara, CA</p>
         <p class="intro">I'm an engineering student who splits his time between writing code and working on the electrical design-build team for a real high-rise. Right now I'm interning with Rosendin Electric's design-build engineering team in San Jose.</p>
         <div class="actions">
           <a class="btn btn-primary" href="mailto:mgomez4@scu.edu">Email me</a>
-          <a class="btn btn-light" href="assets/Marcus-Gomez-Resume.pdf" download>
+          <a class="btn btn-glass glass" href="assets/Marcus-Gomez-Resume.pdf" download>
             <svg class="ico" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v9m0 0-3.5-3.5M10 12l3.5-3.5M4 15.5h12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
             Resume (PDF)
           </a>
@@ -52,12 +59,12 @@
       </div>
 
       <div class="sides">
-        <a class="side fluted" href="#experience">
+        <a class="side glass lens" href="#experience">
           <span class="side-name">In the field</span>
           <span class="side-fact">Summer intern on Kalae Tower, a luxury high-rise, with Rosendin Electric.</span>
           <span class="side-terms">Submittals · BIM · Single-line diagrams · RFIs · BOMs</span>
         </a>
-        <a class="side fluted" href="#projects">
+        <a class="side glass lens" href="#projects">
           <span class="side-name">In code</span>
           <span class="side-fact">Built a webcam object tracker in Python and OpenCV.</span>
           <span class="side-terms">JavaScript · Python · C · MATLAB · Arduino</span>
@@ -70,7 +77,7 @@
     <!-- Experience -->
     <section id="experience" class="section">
       <h2>Where I've worked</h2>
-      <div class="card">
+      <div class="card glass lens">
         <div class="timeline" aria-hidden="true"><div class="rule" id="rule"></div></div>
         <ol class="roles">
           <li class="role-item">
@@ -115,7 +122,7 @@
     <!-- Projects -->
     <section id="projects" class="section">
       <h2>Things I've built</h2>
-      <article class="card project">
+      <article class="card glass lens project">
         <div class="project-body">
           <p class="dates"><time datetime="2025-09">Sep 2025</time> – <time datetime="2025-11">Nov 2025</time></p>
           <h3>Object Tracker</h3>
@@ -137,7 +144,7 @@
     <!-- Skills -->
     <section id="skills" class="section">
       <h2>What I work with</h2>
-      <div class="card skills">
+      <div class="card glass lens skills">
         <div class="skill-col">
           <h3>Field &amp; documents</h3>
           <ul class="tags"><li>Revit</li><li>Revizto</li><li>Bluebeam</li><li>Microsoft Office</li></ul>
@@ -157,7 +164,7 @@
     <section id="education" class="section">
       <h2>Education</h2>
       <div class="edu">
-        <article class="card edu-item">
+        <article class="card glass lens edu-item">
           <div class="edu-top">
             <h3>Santa Clara University</h3>
             <span class="dates">Class of 2029</span>
@@ -168,7 +175,7 @@
             <li>Abstract Data Types &amp; Structures</li><li>Advanced Programming</li><li>Intro to Logic Design</li><li>Electric Circuits I</li><li>Calculus 2</li><li>Calculus 3</li><li>Calculus 4</li>
           </ul>
         </article>
-        <article class="card edu-item">
+        <article class="card glass lens edu-item">
           <div class="edu-top">
             <h3>Kalaheo High School</h3>
             <span class="dates">Class of 2025</span>
@@ -185,7 +192,7 @@
     <!-- Honors -->
     <section id="honors" class="section">
       <h2>Honors &amp; awards</h2>
-      <div class="card honors">
+      <div class="card glass lens honors">
         <div class="honor-col">
           <h3>Academic</h3>
           <ul class="ledger">
@@ -208,16 +215,10 @@
         </div>
       </div>
     </section>
-  </main>
 
-  <!-- Contact: the sky again, at dusk -->
-  <section id="contact" class="dusk">
-    <canvas class="contours" data-contours="dusk" aria-hidden="true"></canvas>
-    <canvas class="clouds" data-clouds="dusk" aria-hidden="true"></canvas>
-    <div class="dusk-inner">
-      <div class="closing-stage">
-      <div class="pane fluted" aria-hidden="true"></div>
-      <div class="card closing">
+    <!-- Contact -->
+    <section id="contact" class="section contact">
+      <div class="card glass lens closing">
         <div class="closing-copy">
           <h2>Let's talk</h2>
           <p>I'm open to internships, projects, and conversations about electrical and computer engineering.</p>
@@ -244,13 +245,13 @@
           </li>
         </ul>
       </div>
-      </div>
-      <footer class="site-footer">
-        <p>&copy; <span id="year">2026</span> Marcus Gomez</p>
-        <p>Santa Clara, CA · Kailua, HI</p>
-      </footer>
-    </div>
-  </section>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; <span id="year">2026</span> Marcus Gomez</p>
+    <p>Santa Clara, CA · Kailua, HI</p>
+  </footer>
 
   <script src="script.js"></script>
 </body>
