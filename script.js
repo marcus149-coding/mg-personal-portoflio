@@ -1,6 +1,7 @@
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
 
-/* ---------- Nav: a black indicator slides to the current section ---------- */
+/* ---------- Nav: a glass lens slides to the current section ---------- */
 (function nav() {
   const navEl = document.querySelector(".nav");
   const list = document.querySelector(".nav-links");
@@ -65,228 +66,86 @@ const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   update();
 })();
 
-/* ---------- Mist: soft bands on canvas, drifting slowly in parallax layers ---------- */
-function seeded(seed) {
-  return () => {
-    seed = (seed * 16807) % 2147483647;
-    return (seed - 1) / 2147483646;
-  };
-}
+/* ---------- Lens: a specular highlight that trails the pointer on a spring ----------
+   Decorative only, so it is gated to fine pointers and switched off for reduced motion.
+   A critically damped spring per axis (no overshoot) gives the light a sense of mass
+   instead of snapping to the cursor. The transform is written straight to the sheen
+   element, not through an inherited CSS variable, so only that one layer restyles. */
+(function lens() {
+  if (!finePointer.matches || reduceMotion.matches) return;
+  const STIFFNESS = 180;
+  const DAMPING = 2 * Math.sqrt(STIFFNESS); // critical damping
 
-// one band of mist, pre-rendered once to its own canvas: a wide, flat, soft-edged ellipse
-function makeCloud(width, rand, tint) {
-  const height = width * 0.3;
-  const c = document.createElement("canvas");
-  c.width = Math.ceil(width); c.height = Math.ceil(height);
-  const g = c.getContext("2d");
-  g.translate(width / 2, height / 2);
-  g.scale(1, 0.3 * (0.85 + rand() * 0.3));
-  const r = width / 2;
-  const grad = g.createRadialGradient(0, 0, 0, 0, 0, r);
-  grad.addColorStop(0, tint);
-  grad.addColorStop(0.45, tint.replace(/[\d.]+\)$/, "0.55)"));
-  grad.addColorStop(1, tint.replace(/[\d.]+\)$/, "0)"));
-  g.fillStyle = grad;
-  g.beginPath(); g.arc(0, 0, r, 0, Math.PI * 2); g.fill();
-  return c;
-}
+  document.querySelectorAll(".lens").forEach((el) => {
+    const sheen = document.createElement("span");
+    sheen.className = "sheen";
+    sheen.setAttribute("aria-hidden", "true");
+    el.prepend(sheen);
 
-const CLOUD_SCENES = {
-  // low mist drifting across the bottom of the navy header
-  day: {
-    tint: "rgba(244,244,244,1)",
-    layers: [
-      { y: [0.76, 0.86], size: 0.55, alpha: 0.07, speed: 3, density: 0.45 },
-      { y: [0.9, 1.02], size: 0.75, alpha: 0.11, speed: 5, density: 0.42 },
-    ],
-  },
-  // a single low band under the contact card, leaving the sky behind it calm
-  dusk: {
-    tint: "rgba(244,244,244,1)",
-    layers: [
-      { y: [0.94, 1.06], size: 0.75, alpha: 0.09, speed: 3, density: 0.42 },
-    ],
-  },
-};
+    const pos = { x: 0, y: 0 }, vel = { x: 0, y: 0 }, target = { x: 0, y: 0 };
+    let raf = 0, last = 0;
 
-document.querySelectorAll("canvas[data-clouds]").forEach((canvas, n) => {
-  const scene = CLOUD_SCENES[canvas.dataset.clouds];
-  if (!scene) return;
-  const ctx = canvas.getContext("2d");
-  let W = 0, H = 0, clouds = [], raf = 0, visible = false;
-  const t0 = performance.now();
-
-  function build() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-    W = canvas.clientWidth; H = canvas.clientHeight;
-    canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const rand = seeded(7 + n * 31);
-    const ref = Math.max(Math.min(W, 1600), 360);
-    clouds = [];
-    scene.layers.forEach((layer) => {
-      const cw = ref * layer.size * (W < 600 ? 1.6 : 1);
-      const count = Math.ceil((W + cw) / (cw * layer.density));
-      for (let i = 0; i < count; i++) {
-        const w = cw * (0.8 + rand() * 0.45);
-        clouds.push({
-          img: makeCloud(w, rand, scene.tint),
-          w, h: w * 0.3,
-          x0: (i / count) * (W + cw) + rand() * cw * 0.3,
-          y: H * (layer.y[0] + rand() * (layer.y[1] - layer.y[0])) - w * 0.15, // the band is centred on this line
-          alpha: layer.alpha * (0.85 + rand() * 0.15),
-          speed: layer.speed,
-          span: W + cw * 1.3,
-        });
+    function step(now) {
+      const dt = Math.min((now - last) / 1000, 1 / 30);
+      last = now;
+      for (const k of ["x", "y"]) {
+        const force = STIFFNESS * (target[k] - pos[k]) - DAMPING * vel[k];
+        vel[k] += force * dt;
+        pos[k] += vel[k] * dt;
       }
-    });
-  }
-
-  function draw(t) {
-    ctx.clearRect(0, 0, W, H);
-    for (const c of clouds) {
-      const x = ((c.x0 + c.speed * t) % c.span) - c.w * 1.1;
-      ctx.globalAlpha = c.alpha;
-      ctx.drawImage(c.img, x, c.y, c.w, c.h);
+      sheen.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
+      const settled = Math.abs(target.x - pos.x) < 0.3 && Math.abs(target.y - pos.y) < 0.3 && Math.abs(vel.x) + Math.abs(vel.y) < 0.5;
+      raf = settled ? 0 : requestAnimationFrame(step);
     }
-    ctx.globalAlpha = 1;
-  }
 
-  function loop(now) {
-    draw((now - t0) / 1000);
-    if (visible && !reduceMotion.matches) raf = requestAnimationFrame(loop);
-  }
+    function aim(e) {
+      const box = el.getBoundingClientRect();
+      target.x = e.clientX - box.left;
+      target.y = e.clientY - box.top;
+      if (!raf) { last = performance.now(); raf = requestAnimationFrame(step); }
+    }
 
-  build(); draw(0);
-  new IntersectionObserver(([entry]) => {
-    visible = entry.isIntersecting;
-    cancelAnimationFrame(raf);
-    if (visible && !reduceMotion.matches) raf = requestAnimationFrame(loop);
-  }).observe(canvas);
-
-  let resizeTimer;
-  new ResizeObserver(() => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => { build(); draw((performance.now() - t0) / 1000); }, 120);
-  }).observe(canvas);
-});
-
-/* ---------- Speckled graphite: seeded fleck tiles, drawn once, used as CSS backgrounds ---------- */
-(function speckle() {
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  function tile(size, seed, flecks) {
-    const c = document.createElement("canvas");
-    c.width = c.height = Math.round(size * dpr);
-    const g = c.getContext("2d");
-    g.scale(dpr, dpr);
-    const rand = seeded(seed);
-    flecks.forEach(({ count, color, alpha, r }) => {
-      for (let i = 0; i < count; i++) {
-        const x = rand() * size, y = rand() * size;
-        const rad = r[0] + Math.pow(rand(), 2.2) * (r[1] - r[0]); // mostly fine grains, a few larger
-        g.globalAlpha = alpha[0] + rand() * (alpha[1] - alpha[0]);
-        g.fillStyle = color;
-        // draw near edges twice so the tile repeats without a seam
-        for (const dx of [0, -size, size]) for (const dy of [0, -size, size]) {
-          if (x + dx < -2 || x + dx > size + 2 || y + dy < -2 || y + dy > size + 2) continue;
-          g.beginPath(); g.arc(x + dx, y + dy, rad, 0, Math.PI * 2); g.fill();
-        }
-      }
+    el.addEventListener("pointerenter", (e) => {
+      // start the light where the pointer came in, so it never flies in from a corner
+      const box = el.getBoundingClientRect();
+      pos.x = target.x = e.clientX - box.left;
+      pos.y = target.y = e.clientY - box.top;
+      vel.x = vel.y = 0;
+      sheen.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
+      el.classList.add("lit");
     });
-    return `url(${c.toDataURL("image/png")})`;
-  }
-  const root = document.documentElement.style;
-  try {
-    root.setProperty("--speckle-dark", tile(240, 1913, [
-      { count: 520, color: "#000000", alpha: [0.18, 0.42], r: [0.45, 1.3] },   // graphite grains
-      { count: 300, color: "#9e9e9e", alpha: [0.06, 0.16], r: [0.4, 1.0] },    // pale graphite sheen
-      { count: 70,  color: "#ffffff", alpha: [0.08, 0.2],  r: [0.35, 0.8] },   // white flecks
-    ]));
-    root.setProperty("--speckle-light", tile(220, 2207, [
-      { count: 260, color: "#1c1c1c", alpha: [0.05, 0.13], r: [0.35, 1.05] },  // pencil graphite on the light field
-      { count: 60,  color: "#7a7a7a", alpha: [0.05, 0.1], r: [0.35, 0.7] },
-      { count: 50,  color: "#ffffff", alpha: [0.25, 0.5],  r: [0.4, 0.9] },
-    ]));
-  } catch { /* canvas unavailable: flat colours remain */ }
+    el.addEventListener("pointermove", aim);
+    el.addEventListener("pointerleave", () => el.classList.remove("lit"));
+  });
 })();
 
-/* ---------- Contour lines: a seeded height field traced with marching squares ---------- */
-function noise2(rand, cols, rows) {
-  const w = cols + 2, grid = new Float32Array(w * (rows + 2));
-  for (let i = 0; i < grid.length; i++) grid[i] = rand();
-  const s = (t) => t * t * (3 - 2 * t);
-  return (x, y) => {
-    const xi = Math.floor(x), yi = Math.floor(y), u = s(x - xi), v = s(y - yi);
-    const a = grid[yi * w + xi], b = grid[yi * w + xi + 1], c = grid[(yi + 1) * w + xi], d = grid[(yi + 1) * w + xi + 1];
-    return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
-  };
-}
+/* ---------- Sections materialize once as they scroll into view ---------- */
+/* Content must never depend on this firing, so it checks positions directly (no observer
+   timing to miss), reveals anything already on screen or scrolled past (deep links, back
+   navigation). If the script never runs, .reveal is never added and nothing is hidden. */
+(function reveal() {
+  let pending = [...document.querySelectorAll("main .section")];
+  pending.forEach((s) => s.classList.add("reveal"));
 
-const CONTOUR_SCENES = {
-  // a summit up and to the right of the name, rings opening toward the lower header
-  day: { seed: 41, levels: 18, peaks: [{ x: 0.8, y: 0.3, s: 0.26, a: 1.3 }, { x: 0.42, y: 1.05, s: 0.2, a: 0.55 }] },
-  dusk: { seed: 97, levels: 16, peaks: [{ x: 0.1, y: 0.25, s: 0.24, a: 1.1 }, { x: 0.92, y: 0.85, s: 0.18, a: 0.6 }] },
-};
-
-document.querySelectorAll("canvas[data-contours]").forEach((canvas) => {
-  const scene = CONTOUR_SCENES[canvas.dataset.contours];
-  if (!scene) return;
-  const ctx = canvas.getContext("2d");
-
-  function draw() {
-    const W = canvas.clientWidth, H = canvas.clientHeight;
-    if (!W || !H) return;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-    const rand = seeded(scene.seed);
-    const octaves = [[300, 1], [150, 0.45], [75, 0.18]].map(([p, wgt]) => ({ p, wgt, n: noise2(rand, Math.ceil(W / p) + 1, Math.ceil(H / p) + 1) }));
-    const ref = Math.max(W, H);
-    const step = W < 600 ? 6 : 8;
-    const nx = Math.ceil(W / step) + 1, ny = Math.ceil(H / step) + 1;
-    const f = new Float32Array(nx * ny);
-    let lo = Infinity, hi = -Infinity;
-    for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
-      const x = Math.min(i * step, W), y = Math.min(j * step, H);
-      let v = 0;
-      for (const o of octaves) v += o.n(x / o.p, y / o.p) * o.wgt;
-      for (const pk of scene.peaks) {
-        const dx = x - pk.x * W, dy = y - pk.y * H, sg = pk.s * ref;
-        v += pk.a * Math.exp(-(dx * dx + dy * dy) / (2 * sg * sg));
-      }
-      f[j * nx + i] = v;
-      if (v < lo) lo = v; if (v > hi) hi = v;
-    }
-
-    ctx.clearRect(0, 0, W, H);
-    ctx.lineJoin = "round"; ctx.lineCap = "round";
-    for (let k = 1; k < scene.levels; k++) {
-      const t = lo + (hi - lo) * (k / scene.levels);
-      const index = k % 5 === 0; // index contours, heavier, as on a survey sheet
-      ctx.strokeStyle = index ? "rgba(244, 244, 244, 0.3)" : "rgba(244, 244, 244, 0.15)";
-      ctx.lineWidth = index ? 1.4 : 1;
-      ctx.beginPath();
-      for (let j = 0; j < ny - 1; j++) for (let i = 0; i < nx - 1; i++) {
-        const a = f[j * nx + i], b = f[j * nx + i + 1], c = f[(j + 1) * nx + i + 1], d = f[(j + 1) * nx + i];
-        const x0 = i * step, y0 = j * step, pts = [];
-        if ((a > t) !== (b > t)) pts.push(x0 + step * (t - a) / (b - a), y0);          // top
-        if ((b > t) !== (c > t)) pts.push(x0 + step, y0 + step * (t - b) / (c - b));   // right
-        if ((d > t) !== (c > t)) pts.push(x0 + step * (t - d) / (c - d), y0 + step);   // bottom
-        if ((a > t) !== (d > t)) pts.push(x0, y0 + step * (t - a) / (d - a));          // left
-        for (let p = 0; p + 3 < pts.length; p += 4) { ctx.moveTo(pts[p], pts[p + 1]); ctx.lineTo(pts[p + 2], pts[p + 3]); }
-      }
-      ctx.stroke();
-    }
+  function check() {
+    const edge = window.innerHeight * 0.92;
+    pending = pending.filter((s) => {
+      if (s.getBoundingClientRect().top < edge) { s.classList.add("in"); return false; }
+      return true;
+    });
+    if (!pending.length) window.removeEventListener("scroll", onScroll);
   }
-
-  draw();
-  let timer;
-  new ResizeObserver(() => {
-    clearTimeout(timer);
-    timer = setTimeout(draw, 150);
-  }).observe(canvas);
-});
+  let ticking = false;
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => { check(); ticking = false; });
+  }
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("hashchange", check);
+  window.addEventListener("load", check);
+  check();
+})();
 
 /* ---------- Experience timeline: months ruled like a measurement, with "now" lit ---------- */
 (function buildTimeline() {
@@ -331,12 +190,13 @@ document.querySelectorAll("canvas[data-contours]").forEach((canvas) => {
   const canvas = document.getElementById("tracker");
   if (!canvas) return;
   const ctx = canvas.getContext("2d");
-  const css = getComputedStyle(document.documentElement);
   const ink = {
-    box: css.getPropertyValue("--light").trim() || "#f4f4f4",
-    tag: css.getPropertyValue("--light").trim() || "#f4f4f4",
-    tagText: css.getPropertyValue("--ink").trim() || "#0a0a0a",
-    obj: css.getPropertyValue("--gray").trim() || "#cccccc",
+    box: "rgb(255, 122, 92)",           // coral
+    tag: "rgb(255, 122, 92)",
+    tagText: "rgb(12, 15, 20)",         // ink
+    obj: "rgba(231, 236, 242, 0.32)",   // mist
+    grid: "rgba(231, 236, 242, 0.06)",
+    text: "rgba(231, 236, 242, 0.85)",
   };
   const W = 480, H = 360;
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -349,9 +209,19 @@ document.querySelectorAll("canvas[data-contours]").forEach((canvas) => {
     { id: 3, w: 58, h: 88, ax: 90, ay: 70, fx: 0.41, fy: 0.29, px: 4.0, py: 2.6, cx: 330, cy: 230 },
   ];
 
+  function roundRect(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
   function draw(t) {
     ctx.clearRect(0, 0, W, H);
-    ctx.strokeStyle = "rgba(244, 244, 244, 0.08)";
+    ctx.strokeStyle = ink.grid;
     ctx.lineWidth = 1;
     for (let x = 40; x < W; x += 40) { ctx.beginPath(); ctx.moveTo(x + 0.5, 0); ctx.lineTo(x + 0.5, H); ctx.stroke(); }
     for (let y = 40; y < H; y += 40) { ctx.beginPath(); ctx.moveTo(0, y + 0.5); ctx.lineTo(W, y + 0.5); ctx.stroke(); }
@@ -367,18 +237,20 @@ document.querySelectorAll("canvas[data-contours]").forEach((canvas) => {
       ctx.fill();
       ctx.strokeStyle = ink.box;
       ctx.lineWidth = 2;
-      ctx.strokeRect(x, y, o.w, o.h);
+      roundRect(x, y, o.w, o.h, 6);
+      ctx.stroke();
       const label = `ID ${o.id}`;
-      const lw = ctx.measureText(label).width + 10;
+      const lw = ctx.measureText(label).width + 12;
       ctx.fillStyle = ink.tag;
-      ctx.fillRect(x - 1, y - 18, lw, 17);
+      roundRect(x - 1, y - 20, lw, 17, 8.5);
+      ctx.fill();
       ctx.fillStyle = ink.tagText;
-      ctx.fillText(label, x + 4, y - 9);
+      ctx.fillText(label, x + 5, y - 11);
     });
 
-    ctx.fillStyle = ink.box;
+    ctx.fillStyle = ink.text;
     ctx.font = "700 13px 'Neuton', Georgia, serif";
-    ctx.fillText(`objects counted: ${objects.length}`, 14, H - 16);
+    ctx.fillText(`objects counted: ${objects.length}`, 16, H - 18);
   }
 
   let visible = false, raf = 0;
